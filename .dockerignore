@@ -13,4 +13,4 @@ env.list
 
 dist
 venv
-data/models/*
+data

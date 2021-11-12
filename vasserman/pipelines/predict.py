@@ -45,4 +45,34 @@ def response(data) -> typing.Dict[str, typing.Union[int, str]]:
     #    'end game': "take money",
     #
     #  }
-    return {"answer": data.get("number of game", 0) % 4 + 1}
+    return {"answer": int(data.get("number of game", 0)) % 4 + 1}
+
+
+
+    #  data:
+    #  {
+    #
+    #    'number of game': 5,
+    #
+    #    'question': "Что есть у Пескова?",
+    #    'answer': 1,
+    #
+    #    'bank': 4000,
+    #    'saved money': 1000,
+    #    'response type': "good"
+    #
+    #  }
+
+    #  data:
+    #  {
+    #
+    #    'number of game': 5,
+    #
+    #    'question': "Что есть у Пескова?",
+    #    'answer': 4,
+    #
+    #    'bank': 1000,
+    #    'saved money': 1000,
+    #    'response type': "bad"
+    #
+    #  }
