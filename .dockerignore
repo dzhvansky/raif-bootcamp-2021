@@ -1,0 +1,16 @@
+*.sh
+*.md
+*.idea
+*.coverage
+*.pytest_cache/*
+cache/*
+*.zip
+scripts/*
+Dockerfile
+*.egg-info
+pytest.ini
+env.list
+
+dist
+venv
+data/models/*

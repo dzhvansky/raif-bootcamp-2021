@@ -1,0 +1,3 @@
+-r requirements.txt
+
+deeppavlov==0.17.1
