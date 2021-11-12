@@ -1,7 +1,13 @@
+import threading
+import time
+
+import requests
 from flask import Flask
 from flask import request
 
+from vasserman import settings
 from vasserman.pipelines.predict import response
+
 
 app = Flask(__name__)
 
@@ -17,5 +23,22 @@ def result_question():
     return {"data": "ok"}
 
 
+def start_runner():
+    def start_loop():
+        not_started = True
+        while not_started:
+            try:
+                r = requests.post(f"{settings.SERVER_HOST}/predict", data=settings.DUMMY_DATA_SAMPLE)
+                if r.status_code == 200:
+                    not_started = False
+            except:
+                pass
+            time.sleep(2)
+
+    thread = threading.Thread(target=start_loop)
+    thread.start()
+
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8090)
+    start_runner()
+    app.run(host="0.0.0.0", port=settings.PORT)

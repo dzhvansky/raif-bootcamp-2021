@@ -1,4 +1,4 @@
-FROM python:3.7-alpine AS compile-image
+FROM python:3.7-bullseye AS compile-image
 
 ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
     LANG="C.UTF-8" \
@@ -10,8 +10,9 @@ WORKDIR $WORKDIR
 
 COPY . .
 
-RUN apk update && apk upgrade && apk add gcc g++ curl unzip cmake && update-ca-certificates
-RUN python -m venv venv && source venv/bin/activate && pip install -U pip setuptools wheel && pip install -e . && deactivate
+RUN apt-get update && apt-get upgrade -y && apt-get install -y gcc g++ curl unzip cmake && update-ca-certificates
+RUN python -m venv venv && chmod 777 venv/bin/activate && ./venv/bin/activate
+RUN venv/bin/pip install -U pip setuptools wheel && venv/bin/pip install -e .
 
 EXPOSE 8090
 
