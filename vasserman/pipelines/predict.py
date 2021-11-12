@@ -5,7 +5,6 @@ from loguru import logger
 
 
 def response(data) -> typing.Dict[str, typing.Union[int, str]]:
-    logger.debug(data)
 
     #  data:
     #  {
