@@ -32,6 +32,7 @@ class QuestionProcessor:
     def __init__(self, ft_model_path, **params):
         self.params = params
         self.model_path = ft_model_path
+        self.previous_response = {}
         # self.ft_model = fasttext.FastText.load_model(ft_model_path)
 
     def _get_probs(self, question: str, answers: typing.List[str], true_answer: typing.Optional[str]=None) -> np.array:
@@ -50,19 +51,47 @@ class QuestionProcessor:
         return np.roll(probs, true_answer - 1 - np.argmax(probs))
 
     def answer(self, request: typing.Dict) -> typing.Dict:
-        probs = self._get_probs(request["question"], [request[f"answer_{i+1}"] for i in range(4)], true_answer=request.get("true"))
-        # logger.info(f"probs = {probs}")
-        prob = np.max(probs).item()
-        answer = 1 + np.random.choice(range(4), p=probs).item() #np.argmax(probs).item()
 
         q_idx = settings.QUESTIONS[request['question money']]
+
+        if self.previous_response and q_idx == self.previous_response.get("q_idx"):
+            probs = self.previous_response["probs"]
+            if self.previous_response["help"] == "can mistake":
+                probs[self.previous_response["answer"] - 1] = 0
+            else:
+                assert self.previous_response["help"] == "fifty fifty"
+                probs[[i for i in range(4) if request[f"answer_{i+1}"] == ""]] = 0
+
+            probs = probs / probs.sum()
+
+        else:
+            probs = self._get_probs(request["question"], [request[f"answer_{i + 1}"] for i in range(4)],
+                                    true_answer=request.get("true"))
+
+
+        prob = np.max(probs).item()
+        answer = 1 + np.random.choice(range(4), p=probs).item()  # np.argmax(probs).item()
+
+
         if prob > THRESHOLDS[q_idx, 1]:
+            self.previous_response = {}
             return {'answer': answer}
         elif prob > THRESHOLDS[q_idx, 3] and prob <= THRESHOLDS[q_idx, 1] and "can mistake" in request['available help']:
-            return {'help': "can mistake", 'answer': answer}
+            output = {'help': "can mistake", 'answer': answer}
+            self.previous_response = {
+                "q_idx": q_idx, "probs": probs,
+            }
+            self.previous_response.update(output)
+            return output
         elif prob > THRESHOLDS[q_idx, 2] and prob <= THRESHOLDS[q_idx, 1] and "fifty fifty" in request['available help']:
-            return {'help': "fifty fifty"}
+            output = {'help': "fifty fifty"}
+            self.previous_response = {
+                "q_idx": q_idx, "probs": probs,
+            }
+            self.previous_response.update(output)
+            return output
         else:
+            self.previous_response = {}
             return {'end game': "take money"}
 
     #  data:

@@ -25,9 +25,9 @@ def ask(number_of_game, row, i, saved_money, available_help, true_answer=None, f
             request_data["answer_3"] = None
             request_data["answer_4"] = None
         else:
+            n_rand = [j for j in np.random.choice(4, size=2, replace=False) if j != true_answer][0]
             for i in range(4):
                 n = i + 1
-                n_rand = [j for j in np.random.choice(4, size=2, replace=False) if j != true_answer][0]
                 request_data[f"answer_{n}"] = row[f"{n}"] if n == true_answer or n == n_rand else ""
 
     else:
@@ -135,19 +135,6 @@ def check(dataset: pd.DataFrame, level: str = "INFO"):
                         int(resp.get("answer", 0)), row, i, saved_money, bank, number_of_game
                     )
 
-                # переход к следующей игре
-                if not status:
-                    number_of_game += 1
-                    total += bank
-                    bank = 0
-                    saved_money = 0
-                    available_help = deepcopy(settings.AVAILABLE_HELP)
-                    logger.info(
-                        f"\n\n--- game #{number_of_game} = {i}/{n_stages} [bank = {total / 1e6}] "
-                        f"\n--- game #{number_of_game + 1} started --- \n"
-                    )
-                    break
-
             else:
                 if resp.get("help") == "fifty fifty":
                     assert "fifty fifty" in available_help
@@ -162,7 +149,7 @@ def check(dataset: pd.DataFrame, level: str = "INFO"):
                         ff=True,
                         true_answer=int(float(row["Правильный ответ"])),
                     )
-                    bank, saved_money, _ = check_answer(
+                    bank, saved_money, status = check_answer(
                         int(resp2.get("answer", 0)), row, i, saved_money, bank, number_of_game
                     )
                 elif resp.get("help") == "new question":
@@ -172,22 +159,24 @@ def check(dataset: pd.DataFrame, level: str = "INFO"):
                     row_new_question = dataset.iloc[(number_of_game + 1) * (n_stages + 1) - 1]
                     n_dropped += 1
                     resp2 = ask(number_of_game, row_new_question, i, saved_money, available_help)
-                    bank, saved_money, _ = check_answer(
+                    bank, saved_money, status = check_answer(
                         int(resp2.get("answer", 0)), row_new_question, i, saved_money, bank, number_of_game
                     )
                 else:
                     logger.error("------------Bad output------------")
                     raise Exception
 
-            if i == len(settings.MONEY) - 1:
+
+            if i == len(settings.MONEY) - 1 or not status:
                 number_of_game += 1
                 total += bank
                 bank = 0
                 saved_money = 0
                 available_help = deepcopy(settings.AVAILABLE_HELP)
                 logger.info(
-                    f"\n\n--- game #{number_of_game} = {i + 1}/{n_stages} [bank = {total / 1e6}] "
+                    f"\n\n--- game #{number_of_game} = {i+1}/{n_stages} [bank = {total / 1e6}] "
                     f"\n--- game #{number_of_game + 1} started --- \n"
                 )
+                break
 
     return bank
