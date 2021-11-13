@@ -10,9 +10,10 @@ WORKDIR $WORKDIR
 
 COPY . .
 
-RUN apt-get update && apt-get upgrade -y && apt-get install -y gcc g++ curl unzip cmake && update-ca-certificates
-RUN python -m venv venv && chmod 777 venv/bin/activate && ./venv/bin/activate
-RUN venv/bin/pip install -U pip setuptools wheel && venv/bin/pip install -e .
+RUN apt-get update && apt-get upgrade -y && apt-get install -y gcc g++ curl unzip cmake && \
+    update-ca-certificates && \
+    python -m venv venv && chmod 777 venv/bin/activate && ./venv/bin/activate && \
+    venv/bin/pip install -U pip setuptools wheel && venv/bin/pip install -e .
 
 EXPOSE 8090
 

@@ -26,6 +26,8 @@ MONEY: typing.List[typing.Tuple[int, bool]] = [
     (1000000, False),
 ]
 
+QUESTIONS: typing.Dict[str, int] = {str(m[0]): i for i, m in enumerate(MONEY)}
+
 AVAILABLE_HELP: typing.List[str] = ["fifty fifty", "can mistake", "new question"]
 
 DUMMY_DATA_SAMPLE: typing.Dict = {
