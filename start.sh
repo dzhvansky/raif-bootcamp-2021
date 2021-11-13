@@ -1,4 +1,4 @@
-python3.7 -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 pip install -U pip setuptools wheel && pip install -e .
 # python -m deeppavlov install ru_odqa_infer_wiki
