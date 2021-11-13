@@ -38,11 +38,9 @@ def ask(number_of_game, row, i, saved_money, available_help, true_answer=None, f
         if after_cm != 0:
             request_data["answer_{after_cm}"] = ""
 
-    request_data["true"] = row["Правильный ответ"]
+    # request_data["true"] = row["Правильный ответ"]
 
-    return requests.post(
-        f"{settings.SERVER_HOST}/predict", data=request_data
-    ).json()  # {"answer" : int(row["Правильный ответ"])}
+    return requests.post(f"{settings.SERVER_HOST}/predict", data=request_data).json()
 
 
 def check_answer(answer, row, i, saved_money, bank, number_of_game, cm=False):
@@ -165,7 +163,6 @@ def check(dataset: pd.DataFrame, level: str = "INFO"):
                 else:
                     logger.error("------------Bad output------------")
                     raise Exception
-
 
             if i == len(settings.MONEY) - 1 or not status:
                 number_of_game += 1
