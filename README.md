@@ -14,3 +14,14 @@ docker build --no-cache --tag local_vasserman:latest ./
 docker run -it --name vasserman -p 8090:8090 local_vasserman
 ```
 
+
+## Run
+* sh script
+```
+./start.sh
+```
+* docker
+```
+docker build --no-cache --tag local_vasserman:latest ./
+docker run -it --name vasserman -p 8090:8090 local_vasserman
+```
