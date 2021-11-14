@@ -28,7 +28,7 @@ def ask(number_of_game, row, i, saved_money, available_help, true_answer=None, f
             n_rand = [j for j in np.random.choice(4, size=2, replace=False) if j != true_answer][0]
             for i in range(4):
                 n = i + 1
-                request_data[f"answer_{n}"] = row[f"{n}"] if n == true_answer or n == n_rand else ""
+                request_data[f"answer_{n}"] = row[f"{n}"] if n == true_answer or n == n_rand else None
 
     else:
         request_data["answer_1"] = row["1"]

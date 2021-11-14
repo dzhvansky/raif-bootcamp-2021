@@ -39,7 +39,7 @@ DUMMY_DATA_SAMPLE: typing.Dict = {
     "answer_3": "?",
     "answer_4": "?",
     "saved money": 0,
-    "available help": AVAILABLE_HELP,
+    "available help": [],
 }
 
 PORT: int = 8090

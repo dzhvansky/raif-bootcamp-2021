@@ -58,8 +58,11 @@ class QuestionProcessor:
         return np.roll(probs, true_answer - 1 - np.argmax(probs))
 
     def answer(self, request: typing.Dict) -> typing.Dict:
-
+        question = request["question"]
+        answers = [request.get(f"answer_{i + 1}", "") for i in range(4)]
+        true_answer = request.get("true", None)
         q_idx = settings.QUESTIONS[request["question money"]]
+        available_help = request.get("available help", [])
 
         if self.previous_response and q_idx == self.previous_response.get("q_idx"):
             probs = self.previous_response["probs"]
@@ -67,29 +70,29 @@ class QuestionProcessor:
                 probs[self.previous_response["answer"] - 1] = 0
             else:
                 assert self.previous_response["help"] == "fifty fifty"
-                probs[[i for i in range(4) if request[f"answer_{i+1}"] == ""]] = 0
+                probs[[i for i in range(4) if answers[i] == ""]] = 0
 
             probs = probs / probs.sum()
 
         else:
-            probs = self._get_probs(
-                request["question"], [request[f"answer_{i + 1}"] for i in range(4)], true_answer=request.get("true")
-            )
+            probs = self._get_probs(question=question, answers=answers, true_answer=true_answer)
 
         # check for wrong answer
-        probs[[i for i in range(4) if re.findall(r"неверный\s+ответ", request[f"answer_{i+1}"].lower())]] = 0
+        probs[[i for i in range(4) if re.findall(r"неверный\s+ответ", answers[i].lower())]] = 0
         probs = probs / probs.sum()
 
         prob = np.max(probs).item()
-        # answer = 1 + np.random.choice(range(4), p=probs).item()  # np.argmax(probs).item()
-        answer = 1 + np.argmax(probs).item()
+
+        if true_answer:
+            # true answer available - for threshold optimization
+            answer = 1 + np.random.choice(range(4), p=probs).item()
+        else:
+            answer = 1 + np.argmax(probs).item()
 
         if prob > THRESHOLDS[q_idx, 1]:
             self.previous_response = {}
             return {"answer": answer}
-        elif (
-            prob > THRESHOLDS[q_idx, 3] and prob <= THRESHOLDS[q_idx, 1] and "can mistake" in request["available help"]
-        ):
+        elif prob > THRESHOLDS[q_idx, 3] and prob <= THRESHOLDS[q_idx, 1] and "can mistake" in available_help:
             output = {"help": "can mistake", "answer": answer}
             self.previous_response = {
                 "q_idx": q_idx,
@@ -97,9 +100,7 @@ class QuestionProcessor:
             }
             self.previous_response.update(output)
             return output
-        elif (
-            prob > THRESHOLDS[q_idx, 2] and prob <= THRESHOLDS[q_idx, 1] and "fifty fifty" in request["available help"]
-        ):
+        elif prob > THRESHOLDS[q_idx, 2] and prob <= THRESHOLDS[q_idx, 1] and "fifty fifty" in available_help:
             output = {"help": "fifty fifty"}
             self.previous_response = {
                 "q_idx": q_idx,

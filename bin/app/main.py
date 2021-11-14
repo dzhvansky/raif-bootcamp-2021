@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    return response(data=request.form)
+    return response(data=request.form.to_dict(flat=True))
 
 
 @app.route("/result_question", methods=["POST"])
